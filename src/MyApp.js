@@ -17,7 +17,18 @@ function MyApp() {
 			console.log(error);
 			return false;
 		}
+	}
 	
+	async function makePostCall(person) {
+		try {
+			const response = await axios.post('http://localhost:5000/users', person);
+			person['id'] = response.data.id;
+			return response;
+		}
+		catch (error) {
+			console.log(error);
+			return false;
+		}
 	}
 	
 	useEffect(() => {
@@ -28,15 +39,21 @@ function MyApp() {
 	}, [] );
 		
 	function updateList(person) {
-		setCharacters([...characters, person]);
+		makePostCall(person).then( result => {
+		if (result && result.status === 201) {
+			setCharacters([...characters, person] );
+		}
+		});
 	}
 		
-	function removeOneCharacter (index) {
-		const updated = characters.filter((character, i) => {
-			return i != index
-		});
-		setCharacters(updated);
+	async function removeOneCharacter (index) {
+		const updated = await axios.delete('http://localhost:5000/users/${index}');
+		if (updated.status === 204) {
+			return updated.data.users_list;
 		}
+		
+	}
+	
 	return (
   	<div className="container">
     	<Table characterData={characters} removeCharacter={removeOneCharacter}/>
