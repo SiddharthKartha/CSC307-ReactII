@@ -22,7 +22,6 @@ function MyApp() {
 	async function makePostCall(person) {
 		try {
 			const response = await axios.post('http://localhost:5000/users', person);
-			person['id'] = response.data.id;
 			return response;
 		}
 		catch (error) {
@@ -41,15 +40,21 @@ function MyApp() {
 	function updateList(person) {
 		makePostCall(person).then( result => {
 		if (result && result.status === 201) {
-			setCharacters([...characters, person] );
+			console.log(result.data);
+			setCharacters([...characters, result.data] );
 		}
 		});
 	}
 		
 	async function removeOneCharacter (index) {
-		const updated = await axios.delete('http://localhost:5000/users/${index}');
-		if (updated.status === 204) {
-			return updated.data.users_list;
+		const delId = characters[index]['id'];
+		console.log(delId);
+		const updated = await axios.delete(`http://localhost:5000/users/${delId}`);
+		if (updated.status === 204) {	
+			const updated = characters.filter((character, i) => {
+			return i !== index
+			})
+			setCharacters(updated);
 		}
 		
 	}
